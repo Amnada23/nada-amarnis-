@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/elmehdidouiri/Projet-DevOps-ElMehdiDouiri.git',
+                    credentialsId: 'github-token'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean test package'
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                echo 'Déploiement local simulé'
+            }
+        }
+    } // fin stages
+
+    post {
+        success {
+            echo '✅ Build réussi'
+        }
+        failure {
+            echo '❌ Build échoué'
+        }
+    }
+} // fin pipeline
